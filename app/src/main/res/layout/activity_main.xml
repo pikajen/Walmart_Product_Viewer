@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Categories" />-->
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="515dp"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/categoriesList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.142" />
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/productGrid"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="30dp"
+        android:numColumns="2"/>
+
+    <!--<TextView-->
+        <!--android:id="@+id/button2"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingBottom="10dp"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintRight_toRightOf="parent"-->
+        <!--android:text="Next Page ->"-->
+        <!--android:onClick="onNextPage"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent" />-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/prevButton"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:onClick="onPrevPage"
+            android:text="&lt;- Previous Page" />
+
+        <TextView
+            android:id="@+id/button2"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:onClick="onNextPage"
+            android:text="Next Page ->" />
+    </LinearLayout>
+
+    <!--<android.support.v7.widget.GridLayout-->
+        <!--android:id="@+id/newGrid"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:columnCount="2">-->
+        <!--&lt;!&ndash; Grid Header &ndash;&gt;-->
+        <!--&lt;!&ndash;<Space&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_columnWeight="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_gravity="center" />&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="cell number"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_columnWeight="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_gravity="center" />&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="destiny"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_columnWeight="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_gravity="center" />&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="voltage"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_columnWeight="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;app:layout_gravity="center" />&ndash;&gt;-->
+
+        <!--<android.support.v7.widget.AppCompatImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--app:layout_columnWeight="1"-->
+            <!--app:layout_gravity="center" />-->
+
+    <!--</android.support.v7.widget.GridLayout>-->
+
+
+</android.support.constraint.ConstraintLayout>
