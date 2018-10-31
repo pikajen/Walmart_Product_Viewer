@@ -17,7 +17,7 @@ public class JSONProductParser {
 
     public static ArrayList<Category> getCategories(String data) throws JSONException {
         JSONObject jObj = new JSONObject(data);
-        ArrayList<Category> categories = new ArrayList<Category>();
+        ArrayList<Category> categories = new ArrayList<>();
         JSONArray jArr = jObj.getJSONArray("categories");
         Category category;
         for(int i = 0; i < jArr.length(); i++) {
@@ -52,6 +52,25 @@ public class JSONProductParser {
         }
         return products;
 
+    }
+
+    public static Product getProductDetails(String data) throws  JSONException{
+        JSONObject prod = new JSONObject(data);
+        Product product = new Product();
+        product.setId(getInt("itemId", prod));
+        product.setName(getString("name", prod));
+        product.setSalePrice(getFloat("salePrice", prod));
+        product.setImage(getString("largeImage", prod));
+        if(product.getImage() != null) {
+            Bitmap img = (whc.getImage(product.getImage()));
+            product.setImageData(img);
+        }
+        product.setBrand(getString("brandName", prod));
+        product.setDesc(getString("longDescription", prod));
+        product.setStock(getString("stock", prod));
+        product.setProdURL(getString("productUrl", prod));
+
+        return product;
     }
 
     public static String getNextPage(String data) throws JSONException {

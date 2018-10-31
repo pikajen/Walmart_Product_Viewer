@@ -13,9 +13,35 @@
         <!--android:text="Categories" />-->
 
 
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.design.widget.TextInputEditText
+            android:inputType="text"
+            android:id="@+id/etValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:imeOptions="actionDone"
+            android:hint="Search" />
+    </android.support.design.widget.TextInputLayout>
+    <!--<EditText-->
+        <!--android:inputType="text"-->
+        <!--android:singleLine="true"-->
+        <!--android:imeOptions="actionDone"-->
+        <!--android:id="@+id/etValue"-->
+        <!--android:hint="Search"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<requestFocus />-->
+    <!--</EditText>-->
+
     <LinearLayout
         android:layout_width="match_parent"
+        android:visibility="visible"
         android:layout_height="515dp"
+        android:paddingTop = "35dp"
         android:orientation="vertical">
 
         <ListView
@@ -32,11 +58,18 @@
 
     <GridView
         android:id="@+id/productGrid"
-        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="472dp"
+        android:numColumns="2"
+
         android:paddingBottom="30dp"
-        android:numColumns="2"/>
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <!--<TextView-->
         <!--android:id="@+id/button2"-->

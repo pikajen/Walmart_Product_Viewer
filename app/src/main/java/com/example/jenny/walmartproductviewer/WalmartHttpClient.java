@@ -12,20 +12,27 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class WalmartHttpClient {
-    public static String API_KEY = "&apiKey=yy5scaux4z2y2y7rs2hz7kw3&format=json";
-    public static String BASE_URL = "http://api.walmartlabs.com/";
-    public static String V_URL = "v1/";
-    public static String CAT_URL = "taxonomy?";
-    public static String PROD_URL = "paginated/items?";
-    public static String COUNT_URL = "count=10";
-    public static String CATID_URL = "category=";
+    public final static String API_KEY = "&apiKey=yy5scaux4z2y2y7rs2hz7kw3&format=json";
+    public final static String BASE_URL = "http://api.walmartlabs.com/";
+    public final static String V_URL = "v1/";
+    public final static String CAT_URL = "taxonomy?";
+    public final static String PROD_URL = "paginated/items?";
+    public final static String COUNT_URL = "count=10";
+    public final static String CATID_URL = "category=";
+    public final static String PRODLOOKUP_URL = "items/";
+    public final static String SEARCH_URL = "search?";
+    public final static String QUERY_URL = "query=";
 
     public String getCategoriesData() {
         return readData(BASE_URL + V_URL + CAT_URL + API_KEY);
     }
 
-    public String getNextProductsData(String nextPageUrl) {
-        return readData(nextPageUrl);
+    public String getProductsData(String pageUrl) {
+        return readData(pageUrl);
+    }
+
+    public String getProductDetailData(String prodID){
+        return readData(BASE_URL + V_URL + PRODLOOKUP_URL + prodID + "?" + API_KEY);
     }
 
     private String readData(String urlString) {

@@ -44,13 +44,15 @@ public class ListViewCustomAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        if (getType() == 1) {
+            Category item = (Category) getItem(position);
+            return Integer.parseInt(item.getId());
+        } else {
+            Product item = (Product) getItem(position);
+            return item.getId();
+        }
     }
 
-//    @Override
-//    public int getItemViewType(int position) {
-//        return type;
-//    }
 
 
     @Override
@@ -74,6 +76,7 @@ public class ListViewCustomAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        View view = convertView;
         int viewType = getType();
         switch (viewType) {
             case 1:
@@ -98,7 +101,6 @@ public class ListViewCustomAdapter extends BaseAdapter {
 
             case 2:
                 ViewHolderProd holderProd;
-                View view = convertView;
                 if (view == null) {
                     LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     view = vi.inflate(R.layout.product_layout, parent, false);
