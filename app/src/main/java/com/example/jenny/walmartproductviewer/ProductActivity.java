@@ -27,15 +27,16 @@ public class ProductActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.product_detail_layout);
         Intent intent = getIntent();
+        //retrieve the product id stored in intent
         String productUrl = intent.getDataString();
-        productDetailName = (TextView) findViewById(R.id.prodDetailName);
-        productDetailDesc = (TextView) findViewById(R.id.prodDetailDescr);
-        productDetailBrand = (TextView) findViewById(R.id.prodDetailBrand);
-        productDetailPrice = (TextView) findViewById(R.id.prodDetailPrice);
-        productDetailStock = (TextView) findViewById(R.id.prodDetailStock);
-        productDetailURL = (TextView) findViewById(R.id.prodDetailURL);
-        //productDetailURL.setMovementMethod(LinkMovementMethod.getInstance());
-        productDetailImage = (ImageView) findViewById(R.id.prodDetailImage);
+        productDetailName = findViewById(R.id.prodDetailName);
+        productDetailDesc = findViewById(R.id.prodDetailDescr);
+        productDetailBrand = findViewById(R.id.prodDetailBrand);
+        productDetailPrice = findViewById(R.id.prodDetailPrice);
+        productDetailStock = findViewById(R.id.prodDetailStock);
+        productDetailURL = findViewById(R.id.prodDetailURL);
+        productDetailImage = findViewById(R.id.prodDetailImage);
+        //start getting details of the product
         new JSONProductDetailTask().execute(productUrl);
     }
 
@@ -44,9 +45,9 @@ public class ProductActivity extends Activity {
         @Override
         protected Product doInBackground(String... params) {
             Product product = new Product();
-
             String data = ((new WalmartHttpClient().getProductDetailData(params[0])));
             try {
+                //parse through the data to get a Product with details populated
                 product = JSONProductParser.getProductDetails(data);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -60,13 +61,18 @@ public class ProductActivity extends Activity {
             if(product.getImageData() != null) {
                 productDetailImage.setImageBitmap(product.getImageData());
             }
-            productDetailName.setText(product.getName());
-            productDetailBrand.setText("Brand: " + product.getBrand());
+            //removing html tags in string
             String html = Html.fromHtml(product.getDesc()).toString();
             productDetailDesc.setText(Html.fromHtml(html));
+            productDetailName.setText(product.getName());
+            productDetailBrand.setText("Brand: " + product.getBrand());
             productDetailStock.setText("Stock: "+ product.getStock());
             productDetailURL.setText(product.getProdURL());
-            productDetailPrice.setText("Price: $" + Float.toString(product.getSalePrice()));
+            if(product.getSalePrice() != -1) {
+                productDetailPrice.setText("Price: $" + Float.toString(product.getSalePrice()));
+            } else {
+                productDetailPrice.setText("Price: N/A");
+            }
         }
 
 

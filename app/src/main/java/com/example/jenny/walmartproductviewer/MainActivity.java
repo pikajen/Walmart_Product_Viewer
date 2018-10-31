@@ -4,23 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridLayout;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,10 +23,7 @@ import com.example.jenny.walmartproductviewer.model.Product;
 
 import org.json.JSONException;
 
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 import static com.example.jenny.walmartproductviewer.WalmartHttpClient.API_KEY;
@@ -47,18 +37,23 @@ import static com.example.jenny.walmartproductviewer.WalmartHttpClient.V_URL;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
+    //constants
+    public final static int TYPE_CATEGORY = 1;
+    public final static int TYPE_PRODUCT = 2;
+
     private ListView lv;
     private GridView gv;
     private ListViewCustomAdapter adapter;
-    private ArrayList<Object> categoryList;
-    private ArrayList<Object> productList;
     private TextView nextButton;
     private TextView prevButton;
+    private EditText editText;
+
     private String nextPageString;
     private String currentPageString;
-    private Stack<String> prevPages;
+    private ArrayList<Object> categoryList;
+    private ArrayList<Object> productList;
+    private Stack<String> prevPagesStack;
     public static WalmartHttpClient whc;
-    private EditText editText;
 
 
     @Override
@@ -66,37 +61,52 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         whc = new WalmartHttpClient();
-        lv = (ListView) findViewById(R.id.categoriesList);
-        gv = (GridView) findViewById(R.id.productGrid);
-        nextButton = (TextView) findViewById(R.id.button2);
-        prevButton = (TextView) findViewById(R.id.prevButton);
-        editText = (EditText) findViewById(R.id.etValue);
+
+        lv = findViewById(R.id.categoriesList);
+        gv = findViewById(R.id.productGrid);
+        nextButton = findViewById(R.id.nextButton);
+        prevButton = findViewById(R.id.prevButton);
+        editText = findViewById(R.id.searchInput);
+        //set listener for each item in the list/grid views
         lv.setOnItemClickListener(this);
         gv.setOnItemClickListener(this);
-        categoryList = new ArrayList<Object>();
+
+        categoryList = new ArrayList<>();
         productList = new ArrayList<>();
-        prevPages = new Stack<>();
+        //create stack to store the history of pages traversed
+        prevPagesStack = new Stack<>();
+
+        //do not change layout when keyboard input is displayed
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
-        JSONWalmartTask task = new JSONWalmartTask();
+
+        //start parsing the categories
+        JSONWalmartCategoryTask task = new JSONWalmartCategoryTask();
         task.execute();
 
+        //listener for when a user inputs a search
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                //if the user presses done on the keyboard
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    //show grid view for products
+                    lv.setVisibility(View.GONE);
+                    gv.setVisibility(View.VISIBLE);
+                    nextButton.setVisibility(View.VISIBLE);
+                    //clear the stack
+                    prevPagesStack.clear();
                     //hide soft keyboard
                     InputMethodManager imm = (InputMethodManager)getSystemService(
                             Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
                     //get the input
                     String text = v.getText().toString();
-                    Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
-                    String url = BASE_URL + V_URL + SEARCH_URL + "&" + QUERY_URL + text + API_KEY;
-                    lv.setVisibility(View.GONE);
-                    gv.setVisibility(View.VISIBLE);
-                    nextButton.setVisibility(View.VISIBLE);
+                    //clear the editText box
                     editText.getText().clear();
-                    prevPages.clear();
+                    Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                    //create the url to get products matching the input
+                    String url = BASE_URL + V_URL + SEARCH_URL + "&" + QUERY_URL + text + API_KEY;
+                    //start parsing products from the url
                     new JSONWalmartProdTask().execute(url);
                     return true;
                 }
@@ -106,61 +116,52 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-
-
     @Override
     public void onBackPressed() {
-      //  if(!isProductView) {
-            lv.setVisibility(View.VISIBLE);
-            gv.setVisibility(View.GONE);
-            nextButton.setVisibility(View.GONE);
-            adapter = null;
-            gv.setAdapter(adapter);
-            adapter = new ListViewCustomAdapter(MainActivity.this, categoryList, 1);
-            lv.setAdapter(adapter);
-     //   } else {
-
-//            setContentView(R.layout.activity_main);
-//            gv = (GridView) findViewById(R.id.productGrid);
-//            gv.setOnItemClickListener(this);
-//            nextButton = (TextView) findViewById(R.id.button2);
-//            prevButton = (TextView) findViewById(R.id.prevButton);
-//            isProductView = false;
-//            gv.setVisibility(View.VISIBLE);
-//            nextButton.setVisibility(View.VISIBLE);
-//            adapter = new ListViewCustomAdapter(MainActivity.this, productList, 2);
-//            gv.setAdapter(adapter);
-            //String prevPage = prevPages.pop();
-            //new JSONWalmartProdTask().execute(currentPageString);
-//        }
-
+        //return to category page and destroy gridView
+        lv.setVisibility(View.VISIBLE);
+        gv.setVisibility(View.GONE);
+        nextButton.setVisibility(View.GONE);
+        adapter = null;
+        gv.setAdapter(adapter);
+        adapter = new ListViewCustomAdapter(MainActivity.this, categoryList, TYPE_CATEGORY);
+        lv.setAdapter(adapter);
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if(adapter.type == 1) {
+        //check the type of the item clicked
+        if(adapter.type == TYPE_CATEGORY) {
+            //if item is category then query products based on category selected
+            //display grid view
             lv.setVisibility(View.GONE);
             gv.setVisibility(View.VISIBLE);
             nextButton.setVisibility(View.VISIBLE);
+            //get the category id from the position
             Category category = (Category) adapter.getItem(position);
             Toast.makeText(this, category.getName(), Toast.LENGTH_SHORT).show();
+            //create the url to get products under the respective category id
             String url = BASE_URL + V_URL + PROD_URL + CATID_URL + category.getId() + "&" + COUNT_URL + API_KEY;
             new JSONWalmartProdTask().execute(url);
-        } else if (adapter.type == 2) {
+
+        } else if (adapter.type == TYPE_PRODUCT) {
+            //if item is product then start new activity that displays the product details
             Intent itemIntent = new Intent(this, ProductActivity.class);
+            //save the itemID in the intent
             String url = Long.toString(adapter.getItemId(position));
             itemIntent.setData(Uri.parse(url));
             startActivity(itemIntent);
-
         }
     }
 
+    //onClick handlers//
     public void onNextPage(View view) {
+        Toast.makeText(this, "Next", Toast.LENGTH_SHORT).show();
         if(prevButton.getVisibility() == View.GONE) {
             prevButton.setVisibility(View.VISIBLE);
         }
-        prevPages.push(currentPageString);
-        Toast.makeText(this, "Next", Toast.LENGTH_SHORT).show();
+        //push the current page's url string in the stack
+        prevPagesStack.push(currentPageString);
         new JSONWalmartProdTask().execute(BASE_URL + nextPageString );
     }
 
@@ -169,17 +170,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(nextButton.getVisibility() == View.GONE) {
             nextButton.setVisibility(View.VISIBLE);
         }
-        String prevPage = prevPages.pop();
+        //get the most recent previous page from the stack
+        String prevPage = prevPagesStack.pop();
         new JSONWalmartProdTask().execute(prevPage);
     }
 
-    private class JSONWalmartTask extends AsyncTask<Void, Void, ArrayList<Category>> {
+    //AsyncTasks//
+    private class JSONWalmartCategoryTask extends AsyncTask<Void, Void, ArrayList<Category>> {
 
         @Override
         protected ArrayList<Category> doInBackground(Void... voids) {
-            ArrayList<Category> categories = new ArrayList<Category>();
+            ArrayList<Category> categories = new ArrayList<>();
             String data = ((whc.getCategoriesData()));
             try {
+                //parse through the data to get an array of Category objects
                 categories = JSONProductParser.getCategories(data);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -192,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             super.onPostExecute(categories);
 
             categoryList.addAll(categories);
+            //add category views to the list view
             adapter = new ListViewCustomAdapter(MainActivity.this, categoryList, 1);
             lv.setAdapter(adapter);
 
@@ -202,12 +207,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         @Override
         protected ArrayList<Product> doInBackground(String...params) {
-            ArrayList<Product> products = new ArrayList<Product>();
-
+            ArrayList<Product> products = new ArrayList<>();
             String data = ((whc.getProductsData(params[0])));
             try {
+                //parse through the data to get an array of Product objects
                 products = JSONProductParser.getProducts(data);
+                //store the current page url in a global variable
                 currentPageString = params[0];
+                //get the next page url and store it
                 nextPageString = JSONProductParser.getNextPage(data);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -218,14 +225,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         @Override
         protected void onPostExecute(ArrayList<Product> products) {
             super.onPostExecute(products);
+            //hide next page button if there is no next page link
             if(nextPageString == null) {
                 nextButton.setVisibility(View.GONE);
             }
-            if(prevPages.empty()) {
+            //hide previous page button if the stack is empty
+            if(prevPagesStack.empty()) {
                 prevButton.setVisibility(View.GONE);
             }
             productList.clear();
             productList.addAll(products);
+            //add product views to the grid view
             adapter = new ListViewCustomAdapter(MainActivity.this, productList, 2);
             gv.setAdapter(adapter);
         }

@@ -18,8 +18,10 @@ public class JSONProductParser {
     public static ArrayList<Category> getCategories(String data) throws JSONException {
         JSONObject jObj = new JSONObject(data);
         ArrayList<Category> categories = new ArrayList<>();
+        //create JSONArray for the list of categories
         JSONArray jArr = jObj.getJSONArray("categories");
         Category category;
+        //iterate through the JSONArray and create a new Category Object for each
         for(int i = 0; i < jArr.length(); i++) {
             category = new Category();
             //populate new category obj with info
@@ -34,16 +36,20 @@ public class JSONProductParser {
 
     public static ArrayList<Product> getProducts(String data) throws JSONException{
         JSONObject jObj = new JSONObject(data);
-        ArrayList<Product> products = new ArrayList<Product>();
+        //create JSONArray for the list of products
+        ArrayList<Product> products = new ArrayList<>();
         JSONArray jArr = jObj.getJSONArray("items");
         Product product;
+        //iterate through the JSONArray and create a new Product Object for each
         for(int i = 0; i < jArr.length(); i++) {
             product = new Product();
+            //populate new product obj with info
             JSONObject prod = jArr.getJSONObject(i);
             product.setId(getInt("itemId", prod));
             product.setName(getString("name", prod));
             product.setSalePrice(getFloat("salePrice", prod));
             product.setImage(getString("largeImage", prod));
+            //check if there is an image for the product first
             if(product.getImage() != null) {
                 Bitmap img = (whc.getImage(product.getImage()));
                 product.setImageData(img);
@@ -57,10 +63,12 @@ public class JSONProductParser {
     public static Product getProductDetails(String data) throws  JSONException{
         JSONObject prod = new JSONObject(data);
         Product product = new Product();
+        //populate new product obj with info
         product.setId(getInt("itemId", prod));
         product.setName(getString("name", prod));
         product.setSalePrice(getFloat("salePrice", prod));
         product.setImage(getString("largeImage", prod));
+        //check if there is an image for the product first
         if(product.getImage() != null) {
             Bitmap img = (whc.getImage(product.getImage()));
             product.setImageData(img);
@@ -75,11 +83,12 @@ public class JSONProductParser {
 
     public static String getNextPage(String data) throws JSONException {
         JSONObject jObj = new JSONObject(data);
+        //parse and get the URL for the next page
         String nextPageURL = getString("nextPage", jObj);
         return nextPageURL;
     }
 
-    //helper functions
+    //helper functions//
     private static String getString(String tagName, JSONObject jObj) throws JSONException {
         if(jObj.has(tagName)) {
             return jObj.getString(tagName);

@@ -48,8 +48,6 @@
         android:layout_weight="1"
         android:text="Stock:" />
 
-
-
     <TextView
         android:id="@+id/prodDetailURL"
         android:autoLink="web"

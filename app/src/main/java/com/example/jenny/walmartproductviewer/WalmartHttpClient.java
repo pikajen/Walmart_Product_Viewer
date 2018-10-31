@@ -24,6 +24,7 @@ public class WalmartHttpClient {
     public final static String QUERY_URL = "query=";
 
     public String getCategoriesData() {
+        //build url to query category data
         return readData(BASE_URL + V_URL + CAT_URL + API_KEY);
     }
 
@@ -32,6 +33,7 @@ public class WalmartHttpClient {
     }
 
     public String getProductDetailData(String prodID){
+        //build url for product lookup
         return readData(BASE_URL + V_URL + PRODLOOKUP_URL + prodID + "?" + API_KEY);
     }
 
@@ -42,16 +44,15 @@ public class WalmartHttpClient {
         try {
             connection = (HttpURLConnection) (new URL(urlString)).openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("accept", "application/json");
             connection.connect();
 
             int status = connection.getResponseCode();
-
+            //check the response
             if (status != HttpURLConnection.HTTP_OK)
                 is = connection.getErrorStream();
             else
                 is = connection.getInputStream();
-
+            //parse through the data and store
             StringBuffer buffer = new StringBuffer();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String line = null;
@@ -65,6 +66,7 @@ public class WalmartHttpClient {
             e.printStackTrace();
         }
         finally {
+            //close the connections
             try {
                 is.close();
             } catch (IOException e) {
@@ -85,7 +87,7 @@ public class WalmartHttpClient {
             connection.connect();
 
             int status = connection.getResponseCode();
-
+            //check the response
             if (status == HttpURLConnection.HTTP_OK) {
                 return BitmapFactory.decodeStream(connection.getInputStream());
             } else
@@ -93,12 +95,14 @@ public class WalmartHttpClient {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            //close the connection
             if (connection != null) {
                 connection.disconnect();
             }
     }
     return null;
 }
+
     public static Bitmap getImage(String urlString) {
         try {
             URL url = new URL(urlString);

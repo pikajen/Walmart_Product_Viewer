@@ -2,8 +2,6 @@ package com.example.jenny.walmartproductviewer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +13,9 @@ import com.example.jenny.walmartproductviewer.model.Category;
 import com.example.jenny.walmartproductviewer.model.Product;
 
 import java.util.ArrayList;
+
+import static com.example.jenny.walmartproductviewer.MainActivity.TYPE_CATEGORY;
+import static com.example.jenny.walmartproductviewer.MainActivity.TYPE_PRODUCT;
 
 public class ListViewCustomAdapter extends BaseAdapter {
     ArrayList<Object> itemList;
@@ -44,16 +45,16 @@ public class ListViewCustomAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        if (getType() == 1) {
+        int type = getType();
+        if (type == TYPE_CATEGORY) {
             Category item = (Category) getItem(position);
             return Integer.parseInt(item.getId());
-        } else {
+        } else if(type == TYPE_PRODUCT) {
             Product item = (Product) getItem(position);
             return item.getId();
         }
+        return 0;
     }
-
-
 
     @Override
     public int getItemViewType(int position) {
@@ -64,10 +65,12 @@ public class ListViewCustomAdapter extends BaseAdapter {
         return type;
     }
 
-    public static class ViewHolder{
+    //ViewHolder for Category items
+    public static class ViewHolderCat{
         TextView categoryName;
     }
 
+    //ViewHolder for Product items
     public static class ViewHolderProd {
         ImageView productImage;
         TextView productName;
@@ -78,56 +81,60 @@ public class ListViewCustomAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         int viewType = getType();
+        //get view based on which type of item
         switch (viewType) {
-            case 1:
-                ViewHolder holder;
-                View v = convertView;
-                if (v == null) {
+            case TYPE_CATEGORY:
+                ViewHolderCat holder;
+                if (view == null) {
+                    //display category layout
                     LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.category_layout, parent, false);
-                    holder = new ViewHolder();
-                    holder.categoryName = (TextView) v.findViewById(R.id.categoryRow);
-                    v.setTag(holder);
+                    view = vi.inflate(R.layout.category_layout, parent, false);
+                    holder = new ViewHolderCat();
+                    holder.categoryName = view.findViewById(R.id.categoryRow);
+                    view.setTag(holder);
                 } else {
-                    holder = (ViewHolder) v.getTag();
+                    holder = (ViewHolderCat) view.getTag();
                 }
-                Category item = (Category) itemList.get(position);
-                if (item != null) {
-                    if (holder.categoryName != null) {
-                        holder.categoryName.setText(item.getName());
-                    }
+                //get selected category item based on position
+                Category itemC = (Category) itemList.get(position);
+                //if item is not null then populate textview with value
+                if (itemC != null) {
+                    //set the text to the name of the item stored in selected object
+                    holder.categoryName.setText(itemC.getName());
                 }
-                return v;
+                return view;
 
-            case 2:
+            case TYPE_PRODUCT:
                 ViewHolderProd holderProd;
                 if (view == null) {
+                    //display product layout
                     LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     view = vi.inflate(R.layout.product_layout, parent, false);
                     holderProd = new ViewHolderProd();
-                    holderProd.productImage = (ImageView)view.findViewById(R.id.productImageView);
-                    holderProd.productName = (TextView) view.findViewById(R.id.productNameTV);
-                    holderProd.productPrice = (TextView) view.findViewById(R.id.productPriceTV);
+                    holderProd.productImage = view.findViewById(R.id.productImageView);
+                    holderProd.productName = view.findViewById(R.id.productNameTV);
+                    holderProd.productPrice = view.findViewById(R.id.productPriceTV);
                     view.setTag(holderProd);
                 } else {
                     holderProd = (ViewHolderProd) view.getTag();
                 }
+                //get selected category itemC based on position
                 Product itemP = (Product) itemList.get(position);
+                //if item is not null then populate textview with value
                 if (itemP != null) {
-                    if (holderProd.productName != null) {
-                        if(itemP.getImageData() != null) {
-                            holderProd.productImage.setImageBitmap(itemP.getImageData());
-                        }
-                        holderProd.productName.setText(itemP.getName());
-                        if(itemP.getSalePrice() != -1) {
-                            holderProd.productPrice.setText("Price: $" + Float.toString(itemP.getSalePrice()));
-                        } else {
-                            holderProd.productPrice.setText("Price: N/A");
-                        }
+                    //set the text to the name of the item stored in selected object
+                    holderProd.productName.setText(itemP.getName());
+                    if(itemP.getImageData() != null) {
+                        //setting the bitmap image in the image view
+                        holderProd.productImage.setImageBitmap(itemP.getImageData());
                     }
-
+                    //if salePrice is not available (-1) then set the text as N/A
+                    if(itemP.getSalePrice() != -1) {
+                        holderProd.productPrice.setText("Price: $" + Float.toString(itemP.getSalePrice()));
+                    } else {
+                        holderProd.productPrice.setText("Price: N/A");
+                    }
                 }
-
                 return view;
             default:
         }
