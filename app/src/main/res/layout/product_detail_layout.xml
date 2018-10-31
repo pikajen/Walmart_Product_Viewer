@@ -19,34 +19,34 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Name" />
+        android:text="@string/name" />
     <TextView
         android:id="@+id/prodDetailDescr"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Description: " />
+        android:text="@string/description" />
 
     <TextView
         android:id="@+id/prodDetailPrice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Price: " />
+        android:text="@string/price" />
 
     <TextView
         android:id="@+id/prodDetailBrand"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Brand: " />
+        android:text="@string/brand" />
 
     <TextView
         android:id="@+id/prodDetailStock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Stock:" />
+        android:text="@string/stock" />
 
     <TextView
         android:id="@+id/prodDetailURL"
@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="URL: " />
+        android:text="@string/url" />
 
 
 </LinearLayout>

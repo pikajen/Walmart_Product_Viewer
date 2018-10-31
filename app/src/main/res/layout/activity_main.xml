@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:imeOptions="actionDone"
-            android:hint="Search" />
+            android:hint="@string/search" />
     </android.support.design.widget.TextInputLayout>
 
     <LinearLayout
@@ -70,7 +70,7 @@
             android:layout_weight="0.5"
             android:gravity="center"
             android:onClick="onPrevPage"
-            android:text="&lt;- Previous Page" />
+            android:text="@string/lt_previous_page" />
 
         <TextView
             android:id="@+id/nextButton"
@@ -80,7 +80,7 @@
             android:layout_weight="0.5"
             android:gravity="center"
             android:onClick="onNextPage"
-            android:text="Next Page ->" />
+            android:text="@string/next_page" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
