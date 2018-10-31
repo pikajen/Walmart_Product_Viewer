@@ -61,11 +61,6 @@ public class JSONProductParser {
     }
 
     //helper functions
-    private static JSONObject getObject(String tagName, JSONObject jObj) throws JSONException {
-        JSONObject subObj = jObj.getJSONObject(tagName);
-        return subObj;
-    }
-
     private static String getString(String tagName, JSONObject jObj) throws JSONException {
         if(jObj.has(tagName)) {
             return jObj.getString(tagName);

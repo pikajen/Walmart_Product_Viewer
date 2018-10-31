@@ -21,140 +21,41 @@ public class WalmartHttpClient {
     public static String CATID_URL = "category=";
 
     public String getCategoriesData() {
-        HttpURLConnection con = null;
-        InputStream is = null;
-
-        try {
-            URL url = new URL(BASE_URL + V_URL + CAT_URL + API_KEY);
-            con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("accept", "application/json");
-//            con.setDoInput(true);
-//            con.setDoOutput(true);
-            con.connect();
-
-            InputStream inputStream;
-
-            int status = con.getResponseCode();
-
-            if (status != HttpURLConnection.HTTP_OK)
-                is = con.getErrorStream();
-            else
-                is = con.getInputStream();
-
-            StringBuffer buffer = new StringBuffer();
-            //is = con.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String line = null;
-            while((line = br.readLine()) != null) {
-                buffer.append(line + "\r\n");
-            }
-
-            is.close();
-            con.disconnect();
-            return buffer.toString();
-
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                con.disconnect();
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-
-        return null;
+        return readData(BASE_URL + V_URL + CAT_URL + API_KEY);
     }
 
-    public String getProductsData(String catID) {
-        HttpURLConnection con = null;
-        InputStream is = null;
-
-        try {
-            URL url = new URL(BASE_URL + V_URL + PROD_URL + CATID_URL + catID + "&" + COUNT_URL + API_KEY);
-            con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("accept", "application/json");
-            con.connect();
-
-
-            int status = con.getResponseCode();
-
-            if (status != HttpURLConnection.HTTP_OK)
-                is = con.getErrorStream();
-            else
-                is = con.getInputStream();
-
-            StringBuffer buffer = new StringBuffer();
-            //is = con.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String line = null;
-            while((line = br.readLine()) != null) {
-                buffer.append(line + "\r\n");
-            }
-
-            is.close();
-            con.disconnect();
-            return buffer.toString();
-
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                con.disconnect();
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-
-        return null;
-    }
     public String getNextProductsData(String nextPageUrl) {
-        HttpURLConnection con = null;
+        return readData(nextPageUrl);
+    }
+
+    private String readData(String urlString) {
+        HttpURLConnection connection = null;
         InputStream is = null;
 
         try {
-            URL url = new URL(nextPageUrl);
-            con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("accept", "application/json");
-            con.connect();
+            connection = (HttpURLConnection) (new URL(urlString)).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("accept", "application/json");
+            connection.connect();
 
-
-            int status = con.getResponseCode();
+            int status = connection.getResponseCode();
 
             if (status != HttpURLConnection.HTTP_OK)
-                is = con.getErrorStream();
+                is = connection.getErrorStream();
             else
-                is = con.getInputStream();
+                is = connection.getInputStream();
 
             StringBuffer buffer = new StringBuffer();
-            //is = con.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String line = null;
             while((line = br.readLine()) != null) {
                 buffer.append(line + "\r\n");
             }
 
-            is.close();
-            con.disconnect();
             return buffer.toString();
 
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         finally {
             try {
@@ -162,10 +63,8 @@ public class WalmartHttpClient {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try {
-                con.disconnect();
-            } catch (Throwable t) {
-                t.printStackTrace();
+            if (connection != null) {
+                connection.disconnect();
             }
         }
 
@@ -173,21 +72,23 @@ public class WalmartHttpClient {
     }
 
     public static Bitmap getImage(URL url) {
-    HttpURLConnection connection = null;
-    try {
-        connection = (HttpURLConnection) url.openConnection();
-        connection.connect();
-        int responseCode = connection.getResponseCode();
-        if (responseCode == 200) {
-            return BitmapFactory.decodeStream(connection.getInputStream());
-        } else
-            return null;
-    } catch (Exception e) {
-        e.printStackTrace();
-    } finally {
-        if (connection != null) {
-            connection.disconnect();
-        }
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+
+            int status = connection.getResponseCode();
+
+            if (status == HttpURLConnection.HTTP_OK) {
+                return BitmapFactory.decodeStream(connection.getInputStream());
+            } else
+                return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
     }
     return null;
 }

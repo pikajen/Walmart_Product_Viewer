@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         nextButton.setVisibility(View.VISIBLE);
         Category category = (Category) adapter.getItem(position);
         Toast.makeText(this, category.getName(), Toast.LENGTH_SHORT).show();
-        //JSONWalmartProdTask task = new JSONWalmartProdTask();
         String url = BASE_URL + V_URL + PROD_URL + CATID_URL + category.getId() + "&" + COUNT_URL + API_KEY;
         new JSONWalmartProdTask().execute(url);
 
