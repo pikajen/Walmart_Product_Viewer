@@ -65,6 +65,14 @@ public class ListViewCustomAdapter extends BaseAdapter {
         return type;
     }
 
+    public void setItemList(ArrayList<Object> itemList){
+        this.itemList = itemList;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
     //ViewHolder for Category items
     public static class ViewHolderCat{
         TextView categoryName;

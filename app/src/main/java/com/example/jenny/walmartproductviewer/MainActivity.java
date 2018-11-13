@@ -23,6 +23,7 @@ import com.example.jenny.walmartproductviewer.model.Product;
 
 import org.json.JSONException;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -47,13 +48,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private TextView nextButton;
     private TextView prevButton;
     private EditText editText;
+    private boolean isFirstPage = true;
 
     private String nextPageString;
-    private String currentPageString;
     private ArrayList<Object> categoryList;
     private ArrayList<Object> productList;
-    private Stack<String> prevPagesStack;
+    private ArrayList<Object> nextProductList;
+    private Stack<ArrayList<Object>> prevPagesStack;
+    private Stack<ArrayList<Object>> nextPagesStack;
     public static WalmartHttpClient whc;
+    private JSONWalmartProdTask prodTask = null;
 
 
     @Override
@@ -73,13 +77,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         categoryList = new ArrayList<>();
         productList = new ArrayList<>();
+        nextProductList = new ArrayList<>();
         //create stack to store the history of pages traversed
-        prevPagesStack = new Stack<>();
+        prevPagesStack = new Stack<ArrayList<Object>>();
+        nextPagesStack = new Stack<ArrayList<Object>>();
 
         //do not change layout when keyboard input is displayed
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
 
         //start parsing the categories
+        adapter = new ListViewCustomAdapter(MainActivity.this, categoryList, TYPE_CATEGORY);
         JSONWalmartCategoryTask task = new JSONWalmartCategoryTask();
         task.execute();
 
@@ -94,7 +101,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     gv.setVisibility(View.VISIBLE);
                     nextButton.setVisibility(View.VISIBLE);
                     //clear the stack
-                    prevPagesStack.clear();
+                    prevPagesStack.removeAllElements();
+                    nextPagesStack.removeAllElements();
                     //hide soft keyboard
                     InputMethodManager imm = (InputMethodManager)getSystemService(
                             Context.INPUT_METHOD_SERVICE);
@@ -107,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     //create the url to get products matching the input
                     String url = BASE_URL + V_URL + SEARCH_URL + "&" + QUERY_URL + text + API_KEY;
                     //start parsing products from the url
-                    new JSONWalmartProdTask().execute(url);
+                    prodTask = (JSONWalmartProdTask) new JSONWalmartProdTask().execute(url);
                     return true;
                 }
                 return false;
@@ -118,14 +126,22 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onBackPressed() {
+        //cancel any running tasks
+        if(prodTask!= null) {
+            prodTask.cancel(true);
+        }
         //return to category page and destroy gridView
         lv.setVisibility(View.VISIBLE);
         gv.setVisibility(View.GONE);
         nextButton.setVisibility(View.GONE);
-        adapter = null;
-        gv.setAdapter(adapter);
-        adapter = new ListViewCustomAdapter(MainActivity.this, categoryList, TYPE_CATEGORY);
-        lv.setAdapter(adapter);
+        prevButton.setVisibility(View.GONE);
+        gv.setAdapter(null);
+        adapter.setItemList(categoryList);
+        adapter.setType(TYPE_CATEGORY);
+        prevPagesStack.removeAllElements();
+        nextPagesStack.removeAllElements();
+        nextProductList.clear();
+        isFirstPage = true;
     }
 
     @Override
@@ -142,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             Toast.makeText(this, category.getName(), Toast.LENGTH_SHORT).show();
             //create the url to get products under the respective category id
             String url = BASE_URL + V_URL + PROD_URL + CATID_URL + category.getId() + "&" + COUNT_URL + API_KEY;
-            new JSONWalmartProdTask().execute(url);
+            prodTask = (JSONWalmartProdTask) new JSONWalmartProdTask().execute(url);
 
         } else if (adapter.type == TYPE_PRODUCT) {
             //if item is product then start new activity that displays the product details
@@ -160,9 +176,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(prevButton.getVisibility() == View.GONE) {
             prevButton.setVisibility(View.VISIBLE);
         }
-        //push the current page's url string in the stack
-        prevPagesStack.push(currentPageString);
-        new JSONWalmartProdTask().execute(BASE_URL + nextPageString );
+        //push the current page's productlist in the stack
+        ArrayList<Object> currentObjects = new ArrayList<>(productList);
+        prevPagesStack.add(currentObjects);
+
+        productList.clear();
+
+        if(nextPagesStack.empty()) {
+            productList.addAll(nextProductList);
+            if (nextPageString == null) {
+                nextButton.setVisibility(View.GONE);
+            } else {
+                prodTask = (JSONWalmartProdTask) new JSONWalmartProdTask().execute(BASE_URL + nextPageString);
+            }
+        } else {
+            ArrayList<Object> nextPage = nextPagesStack.pop();
+            productList.addAll(nextPage);
+        }
+        adapter.notifyDataSetChanged();
     }
 
     public void onPrevPage(View view) {
@@ -170,9 +201,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(nextButton.getVisibility() == View.GONE) {
             nextButton.setVisibility(View.VISIBLE);
         }
+        //store current productList in stack
+        ArrayList<Object> currentObjects = new ArrayList<>(productList);
+        nextPagesStack.add(currentObjects);
         //get the most recent previous page from the stack
-        String prevPage = prevPagesStack.pop();
-        new JSONWalmartProdTask().execute(prevPage);
+        ArrayList<Object> prevPage = prevPagesStack.pop();
+        productList.clear();
+        productList.addAll(prevPage);
+        adapter.notifyDataSetChanged();
+
+        if(prevPagesStack.empty()) {
+            prevButton.setVisibility(View.GONE);
+        }
     }
 
     //AsyncTasks//
@@ -197,7 +237,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             categoryList.addAll(categories);
             //add category views to the list view
-            adapter = new ListViewCustomAdapter(MainActivity.this, categoryList, 1);
             lv.setAdapter(adapter);
 
         }
@@ -212,10 +251,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             try {
                 //parse through the data to get an array of Product objects
                 products = JSONProductParser.getProducts(data);
-                //store the current page url in a global variable
-                currentPageString = params[0];
                 //get the next page url and store it
                 nextPageString = JSONProductParser.getNextPage(data);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -225,19 +263,21 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         @Override
         protected void onPostExecute(ArrayList<Product> products) {
             super.onPostExecute(products);
-            //hide next page button if there is no next page link
-            if(nextPageString == null) {
-                nextButton.setVisibility(View.GONE);
+
+            //if this is the first product page then show in grid
+            if(isFirstPage) {
+                productList.clear();
+                productList.addAll(products);
+                adapter.setType(TYPE_PRODUCT);
+                adapter.setItemList(productList);
+                adapter.notifyDataSetChanged();
+                gv.setAdapter(adapter);
+                isFirstPage = false;
+                new JSONWalmartProdTask().execute(BASE_URL + nextPageString );
+            } else { //else store the next product list
+                nextProductList.clear();
+                nextProductList.addAll(products);
             }
-            //hide previous page button if the stack is empty
-            if(prevPagesStack.empty()) {
-                prevButton.setVisibility(View.GONE);
-            }
-            productList.clear();
-            productList.addAll(products);
-            //add product views to the grid view
-            adapter = new ListViewCustomAdapter(MainActivity.this, productList, 2);
-            gv.setAdapter(adapter);
         }
     }
 }
